@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node index.js",
+    "autodeploy": "node ./deploy/deployServer.js",
+    "autodeploy-bot": "pm2 start index.js --name bot"
   },
   "repository": {
     "type": "git",
@@ -13,7 +16,14 @@
   "author": "Atte Viitanen",
   "license": "ISC",
   "dependencies": {
+    "better-sqlite3": "^5.4.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
     "node-telegram-bot-api": "^0.30.0",
+    "pm2": "^3.5.1",
+    "shelljs": "^0.8.3",
     "sqlite3": "^4.0.8"
   }
 }

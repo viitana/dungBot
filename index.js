@@ -2,13 +2,14 @@ const path = require('path');
 const TelegramBot = require('node-telegram-bot-api');
 const DBHandler = require('./db/DBHandler.js')
 
+require('dotenv').config()
 const token = process.env.TGBOT_TOKEN;
-if(!token) {
-  console.error('*** BOT TOKEN NOT FOUND ***\n* If trying to run officially, ask Atte for token\n* Otherwise generate your own via @BotFather\nExiting');
+if (!token) {
+  console.error('*** BOT TOKEN NOT FOUND ***\n* If trying to run officially, ask Atte for token\n* Otherwise generate your own via @BotFather\n* For export instructions, see repo README\nExiting');
   process.exit();
 }
 
-const bot = new TelegramBot(token, {polling: true});
+const bot = new TelegramBot(token, { polling: true });
 
 // Toggle for debug data printing
 const debug = false;
@@ -34,11 +35,11 @@ const prettifyDuration = (duration) => {
   const m = duration.minutes();
   const s = duration.seconds();
   const ms = duration.milliseconds();
-  if(d && d > 0) str += d + ' days ';
-  if(h && h > 0) str += h + ' hours ';
-  if(m && m > 0) str += m + ' minutes ';
-  if(s && s > 0) str += s + ' seconds ';
-  if(ms && ms > 0) str += ms + ' millisedonds ';
+  if (d && d > 0) str += d + ' days ';
+  if (h && h > 0) str += h + ' hours ';
+  if (m && m > 0) str += m + ' minutes ';
+  if (s && s > 0) str += s + ' seconds ';
+  if (ms && ms > 0) str += ms + ' millisedonds ';
   return str;
 }
 
@@ -53,19 +54,19 @@ bot.onText(/\/start$/, (msg) => {
     const userName = msg.from.username;
     const chatID = msg.chat.id;
 
-    if(!db.userExists(userID)) {
-      if(debug) console.log('User ' + userID + ': Attempting to add user');
+    if (!db.userExists(userID)) {
+      if (debug) console.log('User ' + userID + ': Attempting to add user');
       existed = false;
       db.addUser(userID, userName, 0, 0);
       bot.sendMessage(chatID, 'Let the dumping begin, ' + msg.from.first_name + '!'); // u'\U0001F4A9'
     }
 
-    if(isGroupChat(chatID) && !db.groupHasUser) {
-      if(debug) console.log('User ' + userID + ': Attempting to link user to group (ID ' + chatID + ')');
+    if (isGroupChat(chatID) && !db.groupHasUser) {
+      if (debug) console.log('User ' + userID + ': Attempting to link user to group (ID ' + chatID + ')');
       db.linkUserToGroup(userID, chatID);
       bot.sendMessage(chatID, msg.from.first_name + ' is now part of the ' + msg.chat.title + ' poosquad!'); // u'\U0001F4A9'
     }
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
 });
@@ -76,7 +77,7 @@ bot.onText(/\/start$/, (msg) => {
 // - Give more statistics, possibly with various additional message/command parameters
 // - Charts
 bot.onText(/\/poops/, (msg) => {
-  try{
+  try {
     const userID = msg.from.id;
     const chatID = msg.chat.id;
     if (!userMeetsReq(2, userID, chatID)) return;
@@ -88,7 +89,7 @@ bot.onText(/\/poops/, (msg) => {
       "! You've pooped a total of " + pooCount +
       ' times for a total of ' + netWorth + '€ worth!'
     );
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
 });
@@ -97,7 +98,7 @@ bot.onText(/\/poops/, (msg) => {
 // - Start a poo session for the user if not already in session
 // - Add a poo entry in the database with nulled end, duration and value fields
 bot.onText(/\/startpoo/, (msg) => {
-  try{
+  try {
     const userID = msg.from.id;
     const chatID = msg.chat.id;
     if (!userMeetsReq(2, userID, chatID)) return;
@@ -105,12 +106,12 @@ bot.onText(/\/startpoo/, (msg) => {
       bot.sendMessage(
         chatID,
         'Submit your excretions in the private chat, ' + msg.from.first_name + '!'
-        );
+      );
     } else {
       const success = db.startPoo(userID);
-      bot.sendMessage(chatID, success ? 'New poop started. Bombs away!' : "You're already performing, "+msg.from.first_name+'!');
+      bot.sendMessage(chatID, success ? 'New poop started. Bombs away!' : "You're already performing, " + msg.from.first_name + '!');
     }
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
 });
@@ -120,7 +121,7 @@ bot.onText(/\/startpoo/, (msg) => {
 // - Find the latest poo entry, calculates duration from start and updates fields accordingly
 bot.onText(/\/endpoo/, (msg) => {
   console.log('/endpoo');
-  try{
+  try {
     const userID = msg.from.id;
     const chatID = msg.chat.id;
     if (!userMeetsReq(2, userID, chatID)) return;
@@ -128,13 +129,13 @@ bot.onText(/\/endpoo/, (msg) => {
       bot.sendMessage(
         chatID,
         'Submit your excretions in the private chat, ' + msg.from.first_name + '!'
-        );
+      );
     } else {
       const duration = db.endPoo(userID);
-      if(duration) bot.sendMessage(chatID, 'Target destroyed. Total duration:\n' + prettifyDuration(duration));
-      else bot.sendMessage(chatID, 'You have no ongoing bombings, '+ msg.from.first_name + '.');
+      if (duration) bot.sendMessage(chatID, 'Target destroyed. Total duration:\n' + prettifyDuration(duration));
+      else bot.sendMessage(chatID, 'You have no ongoing bombings, ' + msg.from.first_name + '.');
     }
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
 });
@@ -147,13 +148,13 @@ bot.onText(/\/wage (.+)/, (msg, match) => {
     const chatID = msg.chat.id;
     if (!userMeetsReq(1, userID, chatID)) return;
     const wage = match[1];
-    if(debug) console.log('User ' + userID + ': Attepting to set wage to ' + wage);
-    if(!isNaN(parseFloat(wage))) {
+    if (debug) console.log('User ' + userID + ': Attepting to set wage to ' + wage);
+    if (!isNaN(parseFloat(wage))) {
       let wageF = parseFloat(wage);
       db.updateWage(userID, wageF);
       bot.sendMessage(chatID, 'Your hourly wage has been successfully set to ' + wageF + '!');
     }
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
 });
@@ -177,24 +178,24 @@ bot.onText(/\/wage (.+)/, (msg, match) => {
 const userMeetsReq = (stage, userID, chatID) => {
   try {
     let notReady = false;
-    if(stage >= 0 && !db.userExists(userID)) { // Say /start first
+    if (stage >= 0 && !db.userExists(userID)) { // Say /start first
       console.log('  checked existence');
       bot.sendMessage(chatID, 'Say /start first to start the bonbing!');
       return false;
     }
-    if(stage >= 1 && (isGroupChat(chatID) && !db.groupHasUser(chatID, groupID))) {  // Say /start in new group chat first
+    if (stage >= 1 && (isGroupChat(chatID) && !db.groupHasUser(chatID, groupID))) {  // Say /start in new group chat first
       console.log('  checked group existence');
       bot.sendMessage(chatID, 'Say /start in this chat first to join the poo-squad!')
       return false;
     }
-    if(stage >= 2 && db.userHasNoWage(userID)) { // No wage set'
+    if (stage >= 2 && db.userHasNoWage(userID)) { // No wage set'
       if (isGroupChat(chatID)) bot.sendMessage(chatID, 'Please private message me your hourly pay.');
       else bot.sendMessage(chatID, 'Please give me your hourly pay.');
       console.log('checked wage existence')
       return false;
     }
     return true;
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
 }
