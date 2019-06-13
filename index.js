@@ -58,7 +58,13 @@ bot.onText(/\/start$/, (msg) => {
       if (debug) console.log('User ' + userID + ': Attempting to add user');
       existed = false;
       db.addUser(userID, userName, 0, 0);
-      bot.sendMessage(chatID, 'Let the dumping begin, ' + msg.from.first_name + '!'); // u'\U0001F4A9'
+      bot.sendMessage(chatID, 'Let the dumping begin, ' + msg.from.first_name + `!\n
+      Available commands:\n
+      /start to register in a group chat\n
+      /wage <number> to set your hourly wage\n
+      /startpoo to start a pooing session\n
+      /endpoo to end a pooint session\n
+      /poos to list some basic (for now) poo stats`);
     }
 
     if (isGroupChat(chatID) && !db.groupHasUser) {
@@ -120,7 +126,6 @@ bot.onText(/\/startpoo/, (msg) => {
 // - End the user's poo session if in one
 // - Find the latest poo entry, calculates duration from start and updates fields accordingly
 bot.onText(/\/endpoo/, (msg) => {
-  console.log('/endpoo');
   try {
     const userID = msg.from.id;
     const chatID = msg.chat.id;
