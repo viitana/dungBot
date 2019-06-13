@@ -21,6 +21,8 @@ A Telegram bot that tracks your employer's losses due to you pooping on company 
 ##### Bot
 - Run `npm run dev` to start bot in development mode
 ##### Webhook autodeploy
-- Make sure valid token is exported as env variable TGBOT_DEPLOY_TOKEN and set up in webhook
+- Make sure a valid token is exported as env variable `TGBOT_DEPLOY_TOKEN` **and** set up in webhook
 - Run `npm run autodeploy` to start webhook listener
 - Run `npm run autodeploy-bot` to start bot in autodeploy mode
+
+The bot *should* now pull latest changes and reboot when any megre request completes (merges).
