@@ -12,7 +12,7 @@ if (!token) {
 const bot = new TelegramBot(token, { polling: true });
 
 // Toggle for debug data printing
-const debug = false;
+const debug = true;
 
 // Data directory path and db filename
 const dbDir = 'db';
@@ -179,19 +179,16 @@ const userMeetsReq = (stage, userID, chatID) => {
   try {
     let notReady = false;
     if (stage >= 0 && !db.userExists(userID)) { // Say /start first
-      console.log('  checked existence');
       bot.sendMessage(chatID, 'Say /start first to start the bonbing!');
       return false;
     }
     if (stage >= 1 && (isGroupChat(chatID) && !db.groupHasUser(chatID, groupID))) {  // Say /start in new group chat first
-      console.log('  checked group existence');
       bot.sendMessage(chatID, 'Say /start in this chat first to join the poo-squad!')
       return false;
     }
     if (stage >= 2 && db.userHasNoWage(userID)) { // No wage set'
       if (isGroupChat(chatID)) bot.sendMessage(chatID, 'Please private message me your hourly pay.');
       else bot.sendMessage(chatID, 'Please give me your hourly pay.');
-      console.log('checked wage existence')
       return false;
     }
     return true;

@@ -129,8 +129,6 @@ module.exports = class DBHandler {
   // 1: Pooing
   userPooState (userID) {
     const q = this.db.prepare('SELECT pooState AS result FROM user WHERE userID = ?');
-    console.log(userID);
-    console.log(q.get(userID));
     const res = q.get(userID)
     return res ? res.result : -1;
   }
@@ -155,7 +153,6 @@ module.exports = class DBHandler {
   // TODO:
   // - Implement this in a smarter way, possibly without using the state field?
   userHasNoWage (userID) {
-    console.log(this.userState(userID));
     return this.userState(userID) == 0;
   }
 
