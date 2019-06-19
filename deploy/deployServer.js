@@ -34,16 +34,18 @@ app.post('/', (req, res) => {
     req.body.object_attributes.action === "merge") {
       console.log("GIT HOOK: New merge detected, rebooting")
       shell.exec('pm2 stop bot')
-      shell.exec('git fetch --all');
-      shell.exec('git checkout --force')
+      shell.exec('git checkout master')
+      shell.exec('git reset --hard HEAD');
+      shell.exec('git pull origin master')
       shell.exec('pm2 start index.js --name bot')
   }
 
   if (req.body.object_attributes.description === "Test merge") {
       console.log("GIT HOOK: New test merge detected, rebooting")
       shell.exec('pm2 stop bot')
-      shell.exec('git fetch --all');
-      shell.exec('git checkout --force')
+      shell.exec('git checkout master')
+      shell.exec('git reset --hard HEAD');
+      shell.exec('git pull origin master')
       shell.exec('pm2 start index.js --name bot')
   }
   
