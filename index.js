@@ -64,7 +64,7 @@ bot.onText(/\/start$/, (msg) => {
       /wage <number> to set your hourly wage\n
       /startpoo to start a pooing session\n
       /endpoo to end a pooint session\n
-      /poos to list some basic (for now) poo stats`);
+      /poops to list some basic (for now) poo stats`);
     }
 
     if (isGroupChat(chatID) && !db.groupHasUser) {
