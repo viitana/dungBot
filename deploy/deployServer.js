@@ -23,7 +23,7 @@ app.post('/', (req, res) => {
   // Check if verification token is correct
   const reqToken = req.headers['x-gitlab-token'];
   if (reqToken !== token) {
-    return res.sendStatus(401);
+    return res.status(200).send('OK, bot rebooting!')
   }
 
   // Pull and reboot on successful merge requests
@@ -32,11 +32,13 @@ app.post('/', (req, res) => {
     req.body.object_attributes &&
     req.body.object_attributes.action &&
     req.body.object_attributes.action === "merge") {
+      console.log("GIT HOOK: New merge detected, rebooting")
       shell.exec('pm2 stop bot')
       shell.exec('git fetch --all');
       shell.exec('git checkout --force')
       shell.exec('pm2 start index.js --name bot')
   }
+  
   res.sendStatus(200);
 });
 

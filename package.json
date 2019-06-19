@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node index.js",
-    "autodeploy": "node ./deploy/deployServer.js",
+    "autodeploy": "pm2 deploy/deployServer.js --name deploy && pm2 start index.js --name bot",
     "autodeploy-bot": "pm2 start index.js --name bot"
   },
   "repository": {
