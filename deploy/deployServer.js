@@ -38,17 +38,17 @@ app.post('/', (req, res) => {
   if (req.body.object_attributes.action === "merge") {
       console.log("GIT HOOK: New merge detected, rebooting")
       res.status(200).send('OK, rebooting bot!')
-      await reset()
+      setTimeout(() => reset(), 0) // Setting a zero timeout here breaks execution and allows the response to pass first
   }
 
   // The same for Gitlab merge event tests
   if (req.body.object_attributes.description === "Test merge") {
       console.log("GIT HOOK: New test merge detected, rebooting")
       res.status(200).send('OK, rebooting bot!')
-      await reset()
+      setTimeout(() => reset(), 0) // Setting a zero timeout here breaks execution and allows the response to pass first
   }
   
   res.sendStatus(500);
 });
 
-app.listen(2277, () => console.log('Webhook is listening'));
+app.listen(2277, () => console.log('Webhook is now listening'));
