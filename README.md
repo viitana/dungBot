@@ -14,15 +14,17 @@ A Telegram bot that tracks your employer's losses due to you pooping on company 
 	```
 	TGBOT_TOKEN="MY_COOL_TOKEN"
 	```
-	*If intending to run official version, ask Atte for token.*
+	*If intending to run on the official bot account, ask Atte for token.*
+	
 - If setting up the deployment server via Gitlab webhook, also add variable `TGBOT_DEPLOY_TOKEN`.
 
 ### Usage
 ##### Bot
-- Run `npm run dev` to start bot in development mode
+- Run `npm run dev` to start the bot in development mode
 ##### Webhook autodeploy
 - Make sure a valid token is exported as env variable `TGBOT_DEPLOY_TOKEN` **and** set up in webhook
-- Run `npm run autodeploy` to start webhook listener
-- Run `npm run autodeploy-bot` to start bot in autodeploy mode
+- Run `pm2 start deploy/deployServer.js --name deploy && pm2 start index.js --name bot` to start the webhook listener and bot
 
-The bot *should* now pull latest changes and reboot when any megre request completes (merges).
+The bot will now pull the latest changes and reboot when any merge request completes (merges).
+
+Note that changes to `deployServer.js` will not take place as it doesn't get rebooted. To apply changes to the server, reboot it with for example `pm2 delete deploy && pm2 start deploy/deployServer.js --name deploy`
