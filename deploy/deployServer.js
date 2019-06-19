@@ -38,6 +38,14 @@ app.post('/', (req, res) => {
       shell.exec('git checkout --force')
       shell.exec('pm2 start index.js --name bot')
   }
+
+  if (req.body.object_attributes.description === "Test merge") {
+      console.log("GIT HOOK: New test merge detected, rebooting")
+      shell.exec('pm2 stop bot')
+      shell.exec('git fetch --all');
+      shell.exec('git checkout --force')
+      shell.exec('pm2 start index.js --name bot')
+  }
   
   res.sendStatus(200);
 });
