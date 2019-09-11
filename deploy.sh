@@ -1,5 +1,3 @@
-#!/bin/bash
-
 imgName=poo_bot
 conName=poobot
 
@@ -14,4 +12,4 @@ echo Deleting old container
 docker rm -f $conName
 
 echo Starting new container
-docker run -d -p 443:443 --name $conName $imgName
+docker run -d -p 443:443 -e TGBOT_TOKEN=$1 --name $conName $imgName
