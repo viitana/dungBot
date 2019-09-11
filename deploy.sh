@@ -1,12 +1,14 @@
 #!/bin/bash
 
-imgName=viitana/poo_bot
+imgName=poo_bot
 conName=poobot
 
-echo $DOCKER_USERNAME
+git checkout master
+git reset --hard HEAD
+git pull
 
 echo Building new image
-docker build -t $imgName -f Dockerfile  .
+docker build -t $imgName -f Dockerfile .
 
 echo Deleting old container
 docker rm -f $conName
