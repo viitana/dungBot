@@ -1,7 +1,9 @@
 #!/bin/bash
 
-imgName=poo_bot:latest
+imgName=viitana/poo_bot
 conName=poobot
+
+echo $DOCKER_USERNAME
 
 echo Building new image
 docker build -t $imgName -f Dockerfile  .
