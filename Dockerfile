@@ -12,4 +12,4 @@ COPY . .
 
 # Start
 EXPOSE 443
-CMD ['npm' 'start']
+CMD ["npm", "start"]
