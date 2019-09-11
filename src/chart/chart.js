@@ -5,7 +5,7 @@ import * as linechartSpec from './linechartlite.json'
 import * as linechartSpecMulti from './linechartlitemulti.json'
 import * as vegaThemes from 'vega-themes';
 import moment from 'moment';
-import { getName } from '../util.js';
+import { getName, dbg } from '../util';
 
 process.env["NTBA_FIX_350"] = 1;
 
@@ -14,6 +14,7 @@ const writeErr = err => {
 }
 
 export const genLineChart = (msg, bot, data, group) => {
+  dbg(msg.from, 'Generating graph')
   const graphData = [];
   let accumValue = 0;
   for (let i = 0; i < data.length; i++) {
@@ -42,17 +43,21 @@ export const genLineChart = (msg, bot, data, group) => {
   };
   const lspec = vegaLite.compile(spec).spec;
 
+  dbg(msg.from, 'Init graph view')
   const view = new vega
     .View(vega.parse(lspec, vegaThemes.dark))
     .renderer('none')
     .initialize();
 
+  dbg(msg.from, 'Attempt to generate')
   view
     .toCanvas(3)
     .then(function (canvas) {
       const relativeDir = `src/chart/img/${msg.chat.id}`
       const fileName = 'linechart.png';
+      dbg(msg.from, `Making directory ${relativeDir}`)
       fs.mkdir(relativeDir, { recursive: true }, writeErr);
+      dbg(msg.from, `Writing buffer to ${relativeDir}/${fileName}`)
       fs.writeFile(`${relativeDir}/${fileName}`, canvas.toBuffer(), err => {
         if(err) {
           writeErr(err);
@@ -65,7 +70,7 @@ export const genLineChart = (msg, bot, data, group) => {
             { caption: `You've slammed ${accumValue.toFixed(2)}€ down the drain.\nKeep going! 💩` }
           );
         } catch (error) {
-          bot.sendMessage(msg.chat.id, `Failed to send graph at ${__dirname}\\img\\${msg.chat.id}\\${fileName}`);
+          dbg(msg.from, `Failed to send graph at ${__dirname}\\img\\${msg.chat.id}\\${fileName}`);
         } 
       })
     })
