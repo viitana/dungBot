@@ -32,4 +32,5 @@ COPY . .
 RUN chmod 777 src/entrypoint.sh
 
 EXPOSE 443
+EXPOSE 8080
 CMD ["bash", "src/entrypoint.sh"]
