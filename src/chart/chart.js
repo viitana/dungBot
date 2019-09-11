@@ -58,11 +58,15 @@ export const genLineChart = (msg, bot, data, group) => {
           writeErr(err);
           return;
         }
-        bot.sendPhoto(
-          msg.chat.id,
-          `${__dirname}\\img\\${msg.chat.id}\\${fileName}`,
-          { caption: `You've slammed ${accumValue.toFixed(2)}€ down the drain.\nKeep going! 💩` }
-        );
+        try {
+          bot.sendPhoto(
+            msg.chat.id,
+            `${__dirname}\\img\\${msg.chat.id}\\${fileName}`,
+            { caption: `You've slammed ${accumValue.toFixed(2)}€ down the drain.\nKeep going! 💩` }
+          );
+        } catch (error) {
+          bot.sendMessage(msg.chat.id, `Failed to send graph at ${__dirname}\\img\\${msg.chat.id}\\${fileName}`);
+        } 
       })
     })
     .catch(writeErr)

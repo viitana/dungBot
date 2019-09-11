@@ -318,37 +318,44 @@ bot.on("message", msg => {
     if (doc.file_name === "poop"
       && doc.file_size < 100240
       && doc.mime_type === 'application/x-sqlite3') {
-      bot.getFile(doc.file_id)
-        .then(async fileURI => {
 
-          try {
-            const relativeDir = `src/files/${msg.from.id}`
-            const fileName = `pooPaysData.db`;
 
-            fs.mkdir(relativeDir, { recursive: true }, err => dbg(msg.from, err));
-            const url = `https://api.telegram.org/file/bot${token}/${fileURI.file_path}`
 
-            const res = await fetch(url);
-            const fileStream = fs.createWriteStream(path.join(relativeDir, fileName));
-            
-            await new Promise((resolve, reject) => {
-              res.body.pipe(fileStream);
-              res.body.on("error", err => {
-                reject(err);
+      try {
+        bot.getFile(doc.file_id)
+          .then(async fileURI => {
+
+            try {
+              const relativeDir = `src/files/${msg.from.id}`
+              const fileName = `pooPaysData.db`;
+
+              fs.mkdir(relativeDir, { recursive: true }, err => dbg(msg.from, err));
+              const url = `https://api.telegram.org/file/bot${token}/${fileURI.file_path}`
+
+              const res = await fetch(url);
+              const fileStream = fs.createWriteStream(path.join(relativeDir, fileName));
+              
+              await new Promise((resolve, reject) => {
+                res.body.pipe(fileStream);
+                res.body.on("error", err => {
+                  reject(err);
+                });
+                fileStream.on("finish", () => {
+                  dbg(msg.from, `Successful file save to ${fileStream.path} (${doc.file_size} bytes)`);
+                  const n = exportPooPays(db, fileStream.path, msg.from);
+                  dbg(msg.from, `Successful PooPays export of ${n} entries (${fileStream.path})`);
+                  bot.sendMessage(msg.chat.id, `Successfully imported ${n} entries`);
+                  resolve();
+                });
+
               });
-              fileStream.on("finish", () => {
-                dbg(msg.from, `Successful file save to ${fileStream.path} (${doc.file_size} bytes)`);
-                const n = exportPooPays(db, fileStream.path, msg.from);
-                dbg(msg.from, `Successful PooPays export of ${n} entries (${fileStream.path})`);
-                bot.sendMessage(msg.chat.id, `Successfully imported ${n} entries`);
-                resolve();
-              });
-
-            });
-          } catch (error) {
-              bot.sendMessage(msg.chat.id, 'Failed to parse file');
-          }
-        })
+            } catch (error) {
+                bot.sendMessage(msg.chat.id, 'Failed to parse file');
+            }
+          })
+        } catch (error) {
+          dbg(msg.from, `Failed to receive file ${doc.file_name}  (${doc.file_size} bytes)`);
+        }
     } else {
       dbg(msg.from, `Received invalid file "${doc.file_name}": ${doc.file_id} (${doc.file_size} bytes)`);
       bot.sendMessage(msg.chat.id, "I only accept valid PooPays database files under 100KiB!\nMake sure you've sent the right one.")
