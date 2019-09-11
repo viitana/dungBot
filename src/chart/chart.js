@@ -74,5 +74,5 @@ export const genLineChart = (msg, bot, data, group) => {
         } 
       })
     })
-    .catch(writeErr)
+    .catch(err => dbg(msg.from, `Graph sendout fail: ${err}`))
 }
