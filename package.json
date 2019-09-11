@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node index.js",
     "autodeploy": "pm2 start deploy/deployServer.js --name deploy && pm2 start index.js --name bot",
-    "autodeploy-bot": "pm2 start index.js --name bot"
+    "autodeploy-bot": "pm2 start index.js --name bot",
+    "babel-node": "babel-node --presets=env",
+    "start": "nodemon --exec npm run babel-node -- ./src/index.js",
+    "build": "babel src -d dist"
   },
   "repository": {
     "type": "git",
@@ -18,11 +21,20 @@
   "dependencies": {
     "better-sqlite3": "^5.4.0",
     "body-parser": "^1.19.0",
+    "canvas": "^2.6.0",
     "cors": "^2.8.5",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
+    "node-fetch": "^2.6.0",
     "node-telegram-bot-api": "^0.30.0",
     "pm2": "^3.5.1",
-    "shelljs": "^0.8.3"
+    "shelljs": "^0.8.3",
+    "vega": "^5.6.0",
+    "vega-lite": "^4.0.0-beta.2",
+    "vega-themes": "^2.4.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0"
   }
 }

@@ -3,7 +3,8 @@ CREATE TABLE user(
     userName TEXT,
     currPay REAL,
     state INTEGER,
-    pooState INTEGER
+    pooState INTEGER,
+    userGroup INTEGER
 );
 
 CREATE TABLE group_chat(

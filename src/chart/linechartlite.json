@@ -1,0 +1,31 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "description": "Google's stock price over time.",
+  "data": {"url": "data/stocks.csv"},
+  "mark": "line",
+  "width": 800,
+  "height": 450,
+  "config": {
+    "padding": 15,
+    "axis": {
+      "titlePadding": 10
+    }
+  },
+  "encoding": {
+    "x": {
+      "field": "poodate",
+      "type": "temporal",
+      "axis": {
+        "title": "Date / Time"
+      }
+    },
+    "y": {
+      "field": "value",
+      "type": "quantitative",
+      "axis": {
+        "title": "Earnings (€)",
+        "format": ".2f"
+      }
+    }
+  }
+}

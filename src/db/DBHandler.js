@@ -1,11 +1,12 @@
-const fs = require('fs')
-const Database = require('better-sqlite3')
-const path = require('path')
-const moment = require('moment');
+import fs from 'fs';
+import path from 'path';
+import { prettifyDuration, dbg } from './../util';
+import Database from 'better-sqlite3';
+import moment from 'moment';
 
 // *** DBHandler ***
 // Communicates with the database. Utilizes better-sqlite3.
-module.exports = class DBHandler {
+export default class DBHandler {
   constructor (dbPath, dbFileName) {
     // Absolute database folder path
     this.dbPath = dbPath;
@@ -38,9 +39,32 @@ module.exports = class DBHandler {
   }
 
   // Sum of all poo values for a given user
-  netWorth (userID) {
-    const q = this.db.prepare('SELECT SUM(val) AS result FROM poo WHERE userID = ?');
-    return q.get(userID).result;
+  netWorth (userID, num) {
+    const q = num
+      ? this.db.prepare('SELECT SUM(val) AS result FROM poo WHERE userID = ? LIMIT ?')
+      : this.db.prepare('SELECT SUM(val) AS result FROM poo WHERE userID = ?');
+    const res = num
+      ? q.get(userID, num).result
+      : q.get(userID).result;
+    return res ? res.toFixed(2) : 0;
+  }
+
+  // Get statistics of last n poos
+  lastPoos (userID, num) {
+    const n = Math.min(10, num);
+    const q = this.db.prepare('SELECT * FROM poo WHERE userID = ? ORDER BY start LIMIT ?');
+    const qres =  q.iterate(userID, n);
+    const res = [];
+    let value = 0;
+    for (const line of qres) {
+      res.push(
+        `<code>${moment(line.start).format('DD/MM/YYYY HH:mm:ss')}: ` +
+        `${prettifyDuration(moment.duration(line.duration))}` +
+        `/ ${line.val.toFixed(2)}€</code>`
+      );
+      value += line.val;
+    }
+    return [res.join('\n'), value.toFixed(2), res.length];
   }
 
   // The amount of total poos for a given user
@@ -51,12 +75,12 @@ module.exports = class DBHandler {
 
   // Register a user
   addUser (id, name, p, s) {
-    this.insertUser.run(id, name, p, s);
+    this.insertUser.run(id, name, p, s);  
   }
 
   // Register a poo
   addPoo (id, s, f, d, p, v) {
-    if(userExists(id)) {
+    if(this.userExists(id)) {
       this.insertPoo.run(id, s, f, d, p, v);
     }
   }
@@ -64,6 +88,11 @@ module.exports = class DBHandler {
   // Register a group chat
   addGroup (id) {
     this.insertGroup.run(id);
+  }
+
+  getPoos (userID) {
+    const q = this.db.prepare('SELECT * FROM poo WHERE userID = ?');
+    return q.all(userID);
   }
 
   // Add a poo
@@ -103,7 +132,7 @@ module.exports = class DBHandler {
 
   getLastPooStart (userID) {
     const q = this.db.prepare('SELECT start AS result FROM poo WHERE userID = ? AND finish IS NULL');
-    return moment(q.get(userID).result);
+    return moment.utc(q.get(userID).result);
   }
 
   // Is a given user registered to a given group?
@@ -117,7 +146,30 @@ module.exports = class DBHandler {
     this.linkUserGroup.run(uid, gid);
   }
 
+  // What members are currently linked to a given group?
+  getGroupUsers (gid) {
+    const q = this.db.prepare('SELECT userID FROM user_in_group WHERE chatID = ?');
+    return q.all(gid).map(obj => obj.userID);
+  }
+
+  // Depending on if the chat is a groupchat, remove the user from said group or remove all user data entirely
+  nuke (userID, chatID, group) {
+    if(group) {
+      const q = this.db.prepare('DELETE from user_in_group WHERE userID = ? AND chatID = ?')
+      q.run(userID, chatID);
+    }
+    else {
+      const q1 = this.db.prepare('DELETE from user_in_group WHERE userID = ?');
+      const q2 = this.db.prepare('DELETE from poo WHERE userID = ?');
+      const q3 = this.db.prepare('DELETE from user WHERE userID = ?');
+      q1.run(userID); q2.run(userID); q3.run(userID);
+    }
+  }
+
   // Retrieve the state field for a given user
+  // 0: no wage set
+  // 1: wage set
+  //
   userState (userID) {
     const q = this.db.prepare('SELECT state AS result FROM user WHERE userID = ?');
     return q.get(userID).result;
@@ -156,6 +208,13 @@ module.exports = class DBHandler {
     return this.userState(userID) == 0;
   }
 
+  // Get the current wage for a given user
+  getWage (userID) {
+    const q = this.db.prepare('SELECT currPay AS result FROM user WHERE userID = ?');
+    const res = q.get(userID)
+    return res ? res.result : 0;
+  }
+
   // Set the current wage for a given user
   updateWage (userID, pay) {
     const q = this.db.prepare('UPDATE user SET currPay = ?, state = 1 WHERE userID = ?');
@@ -163,9 +222,9 @@ module.exports = class DBHandler {
   }
 
   // Retrieve the current wage for a given user
-  getWage(userID) {
-    const q = this.db.prepare('SELECT currPay AS result FROM user WHERE userID = ?');
-    return q.get(userID).result;
+  getAdmins() {
+    const q = this.db.prepare('SELECT userID AS result FROM user WHERE userGroup = 1');
+    return q.all();
   }
 
   /* Method for running arbitrary sql files on the db.
@@ -185,4 +244,30 @@ module.exports = class DBHandler {
   close () {
     this.db.close()
   }
+}
+
+export const exportPooPays = (handler, filepath, from) => {
+  try {
+    const userID = from.id
+    const db = new Database(filepath);
+    const q = db.prepare("SELECT * from poop");
+    const res = q.all();
+    let n = 0;
+    for (const entry of res) {
+      const date = moment(entry.DATELONG).utc();
+      const s = date.format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+      const worth = entry.MONEY;
+      const durationMoment = moment.duration(entry.LENGTH);
+      const duration = moment.utc(durationMoment.asMilliseconds()).format('hh:mm:ss.SSS')
+      const wage = worth / durationMoment.asHours()
+      const end = date.add(durationMoment).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+
+      handler.insertPoo.run(userID, s, end, duration, wage, worth, 0)
+      n++;
+    }
+    return n;
+  } catch (err) {
+    dbg(from,'Failed exporting PooPay file:\n' + err);
+  }
+  
 }

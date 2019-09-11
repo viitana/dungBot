@@ -1,6 +1,13 @@
 # dotenv
 .env
 
+#database
+src/db/*.db
+
+#generated files
+src/files/*
+src/chart/img/*
+
 # Logs
 logs
 *.log
