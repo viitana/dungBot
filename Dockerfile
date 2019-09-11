@@ -4,12 +4,17 @@ FROM node:12
 WORKDIR /usr/src/app
 
 # Install dependencies
+
 COPY package*.json ./
 RUN npm ci
 
 # Bundle source
+
 COPY . .
 
 # Start
+
+RUN chmod 777 src/entrypoint.sh
+
 EXPOSE 443
-CMD ["npm", "start"]
+CMD ["bash", "src/entrypoint.sh"]
