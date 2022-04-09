@@ -22,7 +22,7 @@
     "better-sqlite3": "^5.4.0",
     "canvas": "^2.6.0",
     "dotenv": "^8.0.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "node-fetch": "^2.6.0",
     "node-telegram-bot-api": "^0.30.0",
     "nodemon": "^1.19.2",
